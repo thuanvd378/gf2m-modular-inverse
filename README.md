@@ -1,35 +1,64 @@
-# GF(2^m) Modular Inverse
+# GF(2¹⁰) Modular Inverse — Extended Euclidean Algorithm
 
-Chương trình tìm **nghịch đảo modular** của phần tử trong trường hữu hạn **GF(2^m)** sử dụng thuật toán **Extended Euclidean Algorithm** (Euclid mở rộng) trên đa thức nhị phân.
+Cài đặt thuật toán **Euclidean mở rộng** (Extended Euclidean Algorithm) để tìm **nghịch đảo nhân** của một phần tử trong trường hữu hạn **GF(2¹⁰)**, với đa thức tối giản **m(x) = x¹⁰ + x³ + 1**.
+
+## Đề bài
+
+> Cài đặt thuật toán Euclidean mở rộng để tìm nghịch đảo nhân của một số trong trường GF(2¹⁰), với đa thức tối giản là m(x) = x¹⁰ + x³ + 1.
+>
+> **Test vector:** a = 523, b = 1015. Tìm a⁻¹, b⁻¹.
+>
+> In ra từng giá trị trung gian của các bước tính số dư và nhân cho đến khi kết thúc thuật toán.
 
 ## Mô tả
 
-Trong mật mã học và an toàn thông tin, phép tính nghịch đảo trên trường hữu hạn GF(2^m) là thao tác cơ bản được sử dụng rộng rãi trong các thuật toán mã hóa như **AES**, **ECC (Elliptic Curve Cryptography)**, và các hệ mã dựa trên đường cong elliptic.
+Trong trường hữu hạn GF(2¹⁰), mỗi phần tử được biểu diễn bằng một đa thức bậc tối đa 9 với hệ số thuộc GF(2) (tức là 0 hoặc 1). Nghịch đảo nhân của phần tử `a(x)` là phần tử `a⁻¹(x)` thỏa mãn:
 
-Chương trình thực hiện các phép toán sau trên đa thức nhị phân:
+```
+a(x) · a⁻¹(x) ≡ 1  (mod m(x))
+```
+
+Trong đó `m(x) = x¹⁰ + x³ + 1` là đa thức tối giản (bất khả quy) của trường.
+
+## Các hàm trong chương trình
 
 | Hàm | Chức năng |
 |---|---|
 | `bac_da_thuc(x)` | Tính bậc của đa thức (biểu diễn dưới dạng số nguyên) |
 | `nhan_da_thuc(a, b)` | Nhân hai đa thức trong GF(2) bằng phương pháp shift-and-XOR |
 | `chia_da_thuc(A, B, Q, R)` | Chia đa thức A cho B, trả về thương Q và dư R |
-| `tim_nghich_dao(a, m)` | Tìm nghịch đảo của đa thức a modulo m bằng Extended Euclidean Algorithm |
+| `tim_nghich_dao(a, m)` | Tìm nghịch đảo của a modulo m bằng Extended Euclidean Algorithm |
 
-## Tham số mặc định
+## Biểu diễn đa thức bằng số nguyên
 
-- **Đa thức bất khả quy (modulus):** `m = 1033` → tương ứng `x^10 + x^3 + 1`
-- **Phần tử a:** `523` → tương ứng `x^9 + x^3 + x + 1`
-- **Phần tử b:** `1015` → tương ứng `x^9 + x^8 + x^7 + x^6 + x^4 + x^2 + x + 1`
-
-## Cách biểu diễn đa thức
-
-Các đa thức được biểu diễn dưới dạng **số nguyên** sử dụng biểu diễn nhị phân. Mỗi bit tương ứng với hệ số của một bậc:
+Mỗi đa thức được biểu diễn dưới dạng **số nguyên** bằng biểu diễn nhị phân. Mỗi bit tương ứng với hệ số của một bậc:
 
 ```
-Ví dụ: 1033 = 10000001001 (nhị phân)
-       = 1·x^10 + 0·x^9 + ... + 1·x^3 + 0·x^2 + 0·x + 1
-       = x^10 + x^3 + 1
+m(x) = x¹⁰ + x³ + 1
+     = 10000001001 (nhị phân)
+     = 1033 (thập phân)
+
+a(x) = 523 = 1000001011 (nhị phân)
+     = x⁹ + x³ + x + 1
+
+b(x) = 1015 = 1111110111 (nhị phân)
+     = x⁹ + x⁸ + x⁷ + x⁶ + x⁵ + x⁴ + x² + x + 1
 ```
+
+## Thuật toán Extended Euclidean trên GF(2¹⁰)
+
+**Mục tiêu:** Cho `a(x)` và đa thức tối giản `m(x)`, tìm `a⁻¹(x)` sao cho `a(x) · a⁻¹(x) ≡ 1 (mod m(x))`.
+
+**Các bước:**
+
+1. **Khởi tạo:** `r₁ = m(x)`, `r₂ = a(x)`, `t₁ = 0`, `t₂ = 1`
+2. **Lặp** cho đến khi `r₂ = 0`:
+   - Chia đa thức: `r₁ = q(x) · r₂ + r` → tìm thương `q` và dư `r`
+   - Tính: `t = t₁ ⊕ (q · t₂)` (phép nhân đa thức rồi XOR)
+   - Cập nhật: `r₁ ← r₂`, `r₂ ← r`, `t₁ ← t₂`, `t₂ ← t`
+3. **Kết quả:** `a⁻¹(x) = t₁`
+
+> **Lưu ý:** Trên GF(2), phép cộng và phép trừ đều là phép XOR (⊕).
 
 ## Yêu cầu hệ thống
 
@@ -38,71 +67,100 @@ Ví dụ: 1033 = 10000001001 (nhị phân)
 
 ## Biên dịch và chạy
 
-### Trên Linux / macOS
+### Sử dụng Makefile (Linux / macOS)
 
 ```bash
-g++ -o gf2m_modular_inverse gf2m_modular_inverse.cpp
-./gf2m_modular_inverse
+make        # Biên dịch
+make run    # Biên dịch và chạy
+make clean  # Xóa file thực thi
 ```
 
-### Trên Windows (MinGW)
+### Biên dịch thủ công
 
-```cmd
-g++ -o gf2m_modular_inverse.exe gf2m_modular_inverse.cpp
+```bash
+# Linux / macOS
+g++ -Wall -Wextra -std=c++17 -o gf2m_modular_inverse gf2m_modular_inverse.cpp
+./gf2m_modular_inverse
+
+# Windows (MinGW)
+g++ -Wall -Wextra -std=c++17 -o gf2m_modular_inverse.exe gf2m_modular_inverse.cpp
 gf2m_modular_inverse.exe
 ```
 
-## Kết quả mẫu
+## Kết quả chạy chương trình
+
+Chương trình in ra **từng giá trị trung gian** của các bước tính số dư và nhân:
 
 ```
 --- Tim nghich dao cua 523 ---
-Phep chia r: 1033 / 523 duoc thuong q = 2, so du r = 13
+Phep chia r: 1033 / 523 duoc thuong q = 2, so du r = 31
 Phep nhan: q * t2 = 2 * 1 = 2
 Tinh t moi: t1 ^ (q * t2) = 0 ^ 2 = 2
 
-Phep chia r: 523 / 13 duoc thuong q = 42, so du r = 5
-Phep nhan: q * t2 = 42 * 2 = 84
-...
+Phep chia r: 523 / 31 duoc thuong q = 49, so du r = 4
+Phep nhan: q * t2 = 49 * 2 = 98
+Tinh t moi: t1 ^ (q * t2) = 1 ^ 98 = 99
+
+Phep chia r: 31 / 4 duoc thuong q = 7, so du r = 3
+Phep nhan: q * t2 = 7 * 99 = 297
+Tinh t moi: t1 ^ (q * t2) = 2 ^ 297 = 299
+
+Phep chia r: 4 / 3 duoc thuong q = 3, so du r = 1
+Phep nhan: q * t2 = 3 * 299 = 893
+Tinh t moi: t1 ^ (q * t2) = 99 ^ 893 = 798
+
+Phep chia r: 3 / 1 duoc thuong q = 3, so du r = 0
+Phep nhan: q * t2 = 3 * 798 = 1314
+Tinh t moi: t1 ^ (q * t2) = 299 ^ 1314 = 1033
+
+Nghich dao cua 523 la: 798
 
 --- Tim nghich dao cua 1015 ---
-...
+Phep chia r: 1033 / 1015 duoc thuong q = 3, so du r = 16
+Phep nhan: q * t2 = 3 * 1 = 3
+Tinh t moi: t1 ^ (q * t2) = 0 ^ 3 = 3
+
+Phep chia r: 1015 / 16 duoc thuong q = 63, so du r = 7
+Phep nhan: q * t2 = 63 * 3 = 65
+Tinh t moi: t1 ^ (q * t2) = 1 ^ 65 = 64
+
+Phep chia r: 16 / 7 duoc thuong q = 6, so du r = 2
+Phep nhan: q * t2 = 6 * 64 = 384
+Tinh t moi: t1 ^ (q * t2) = 3 ^ 384 = 387
+
+Phep chia r: 7 / 2 duoc thuong q = 3, so du r = 1
+Phep nhan: q * t2 = 3 * 387 = 645
+Tinh t moi: t1 ^ (q * t2) = 64 ^ 645 = 709
+
+Phep chia r: 2 / 1 duoc thuong q = 2, so du r = 0
+Phep nhan: q * t2 = 2 * 709 = 1418
+Tinh t moi: t1 ^ (q * t2) = 387 ^ 1418 = 1033
+
+Nghich dao cua 1015 la: 709
 ```
 
-## Cơ sở lý thuyết
+### Kết quả
 
-### Extended Euclidean Algorithm trên GF(2^m)
-
-Thuật toán sử dụng phép chia Euclid mở rộng để tìm nghịch đảo:
-
-Cho đa thức `a(x)` và đa thức bất khả quy `m(x)`, tìm `a⁻¹(x)` sao cho:
-
-```
-a(x) · a⁻¹(x) ≡ 1 (mod m(x))
-```
-
-**Các bước:**
-1. Khởi tạo: `r₁ = m`, `r₂ = a`, `t₁ = 0`, `t₂ = 1`
-2. Lặp cho đến khi `r₂ = 0`:
-   - Tính `q, r` sao cho `r₁ = q · r₂ + r` (phép chia đa thức)
-   - Cập nhật: `t = t₁ ⊕ (q · t₂)`
-   - Gán: `r₁ ← r₂`, `r₂ ← r`, `t₁ ← t₂`, `t₂ ← t`
-3. Kết quả: `a⁻¹ = t₁`
-
-> **Lưu ý:** Phép cộng và trừ trên GF(2) đều là phép XOR (⊕).
+| Phần tử | Nghịch đảo |
+|---|---|
+| a = 523 | a⁻¹ = **798** |
+| b = 1015 | b⁻¹ = **709** |
 
 ## Cấu trúc project
 
 ```
 gf2m-modular-inverse/
 ├── gf2m_modular_inverse.cpp   # Mã nguồn chính
+├── Makefile                   # Tự động hóa biên dịch
 ├── .gitignore                 # Danh sách file bị bỏ qua bởi Git
+├── .editorconfig              # Quy chuẩn coding style
 ├── LICENSE                    # Giấy phép MIT
 └── README.md                  # Tài liệu hướng dẫn (file này)
 ```
 
 ## Tác giả
 
-- **Họ tên:** thuanvd378
+- **GitHub:** [thuanvd378](https://github.com/thuanvd378)
 - **Trường:** Đại học Bách khoa Hà Nội (HUST)
 - **Môn học:** An toàn thông tin
 
