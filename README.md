@@ -161,7 +161,8 @@ gf2m-modular-inverse/
 ## Tác giả
 
 - **GitHub:** [thuanvd378](https://github.com/thuanvd378)
-- **Trường:** Đại học Bách khoa Hà Nội (HUST)
+- **Trường:** Đại học Bách khoa Hà Nội 
+- **MSSV:** 20234039
 - **Môn học:** An toàn thông tin
 
 ## Giấy phép
