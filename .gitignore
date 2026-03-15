@@ -1,0 +1,15 @@
+# Compiled files
+*.exe
+*.o
+*.obj
+*.out
+
+# IDE files
+.vscode/
+.idea/
+*.suo
+*.user
+
+# OS files
+Thumbs.db
+.DS_Store
